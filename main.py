@@ -1,13 +1,16 @@
 import json
 
-def print_last_operations(file_path):
-    with open(file_path, 'r', encoding='utf-8') as f:
-        data = json.load(f)
+with open("operations.json", 'r', encoding='utf-8') as f:
+    data = json.load(f)
 
-    sorted_operations = sorted(data, key=lambda x: x['date'], reverse=True)
-    last_operations = sorted_operations[:5]
 
-    for operation in last_operations:
+def last_operations():
+    operations = sorted(data, key=lambda x: x['date'], reverse=True)[:5]
+    return operations
+
+
+def print_operations():
+    for operation in last_operations():
         date = operation['date'][:10]
         description = operation['description']
         from_value = operation.get('from', '')
@@ -23,27 +26,34 @@ def print_last_operations(file_path):
         print(f"{amount} {currency}")
         print()
 
+
 def mask_number(number):
     if number.startswith('Счет'):
         return f"Счет **{number[-4:]}"
     elif number.startswith('Visa'):
-        number = number.split()
-        visa_card = " ".join(number[:2])
-        card_number = number[2]
-        parts = [card_number[i:i + 4] for i in range(0, len(card_number), 4)]
-        parts[2] = "****"
-        result = " ".join(parts)
-        return f"{visa_card} {result}"
+        return mask_visa_number(number)
     elif number.startswith('Maestro'):
-        number = number.split()
-        maestro_card = " ".join(number[:1])
-        card_number = number[1]
-        parts = [card_number[i:i + 4] for i in range(0, len(card_number), 4)]
-        parts[2] = "****"
-        result = " ".join(parts)
-        return f"{maestro_card} {result}"
+        return mask_maestro_number(number)
 
 
+def mask_maestro_number(number):
+    number = number.split()
+    maestro_card = " ".join(number[:1])
+    card_number = number[1]
+    parts = [card_number[i:i + 4] for i in range(0, len(card_number), 4)]
+    parts[2] = "****"
+    result = " ".join(parts)
+    return f"{maestro_card} {result}"
 
-print_last_operations("operations.json")
 
+def mask_visa_number(number):
+    number = number.split()
+    visa_card = " ".join(number[:2])
+    card_number = number[2]
+    parts = [card_number[i:i + 4] for i in range(0, len(card_number), 4)]
+    parts[2] = "****"
+    result = " ".join(parts)
+    return f"{visa_card} {result}"
+
+
+print_operations()
